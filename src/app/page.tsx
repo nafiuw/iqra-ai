@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, BookOpen, Users, Globe } from 'lucide-react'
+import { Search, BookOpen, Users, Globe, Loader2 } from 'lucide-react'
 
 export default function Home() {
   const [question, setQuestion] = useState('')
@@ -18,10 +18,16 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question })
       })
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      
       const data = await response.json()
       setAnswer(data.answer)
     } catch (error) {
-      setAnswer('Sorry, there was an error. Please try again.')
+      console.error('Error:', error)
+      setAnswer('Sorry, there was an error. Please try again later.')
     }
     setLoading(false)
   }
@@ -59,7 +65,7 @@ export default function Home() {
                 disabled={loading}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
               >
-                <Search className="h-5 w-5" />
+                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
                 {loading ? 'Searching...' : 'Ask'}
               </button>
             </div>
@@ -71,7 +77,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
               <div className="prose prose-lg max-w-none dark:prose-invert">
-                <div dangerouslySetInnerHTML={{ __html: answer }} />
+                <div className="whitespace-pre-wrap">{answer}</div>
               </div>
             </div>
           </div>
