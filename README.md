@@ -6,13 +6,21 @@
 An intelligent Islamic knowledge assistant that provides authentic answers from Quran, Hadith, and reliable Islamic sources.
 
 ✨ Features
+
 📖 Quran First: Prioritizes answers from the Holy Quran
+
 🕌 Hadith Integration: Includes authentic Hadith collections
+
 🌐 Multi-language Support: English and Bangla
+
 📱 Mobile Friendly: Works perfectly on all devices
+
 🔍 Smart Search: Finds relevant Islamic content
+
 🛡️ Safe Content: Filters for authentic Islamic sources only
+
 🎨 Beautiful UI: Clean, professional interface
+
 🚀 Quick Deploy (One Click)
 Deploy to Vercel
 
@@ -24,7 +32,7 @@ Vercel account (free)
 Installation
 
 # Clone the repository
-git clone https://github.com/your-username/iqra-ai.git
+git clone https://github.com/nafiuw/iqra-ai.git
 cd iqra-ai
 
 # Install dependencies
