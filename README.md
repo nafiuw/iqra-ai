@@ -91,16 +91,25 @@ DATABASE_URL: sqlite:///dev.db
 NEXTAUTH_SECRET: Generate a random string
 Deploy and share your URL!
 Other Platforms
+
 Netlify: Works with similar setup
 Railway: Good for scaling
 Digital Ocean: Full control
+
 🛡️ Security Features
+
 ✅ Content Filtering: Only authentic Islamic sources
+
 ✅ Rate Limiting: Prevents abuse
+
 ✅ Input Validation: Safe user interactions
+
 ✅ Secure API: Protected endpoints
+
 ✅ CORS Protection: Secure cross-origin requests
+
 📈 Monitoring
+
 Health Check
 curl https://your-domain.com/api/health
 Analytics
@@ -152,4 +161,5 @@ Thanks to Allah (SWT) for the opportunity to serve the Ummah
 All Islamic scholars and content creators
 The open-source community for excellent tools
 Users who provide feedback and suggestions
+
 🌟 JazakAllah Khair for using Iqra AI! May it benefit many! 🌟
