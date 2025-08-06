@@ -121,7 +121,7 @@ Digital Ocean: Full control
 📈 Monitoring
 
 Health Check
-curl https://your-domain.com/api/health
+curl https://iqra-ai-n9ys.vercel.app/api/health
 Analytics
 Vercel built-in analytics
 User engagement tracking
@@ -130,9 +130,8 @@ Popular questions monitoring
 Frontend: Next.js 15 with TypeScript
 Styling: Tailwind CSS + shadcn/ui
 Database: SQLite with Prisma ORM
-AI: Z.ai Web Development SDK
 Real-time: Socket.IO
-Deployment: Vercel/Netlify
+Deployment: Vercel
 🤝 Contributing
 Fork the repository
 Create a feature branch
