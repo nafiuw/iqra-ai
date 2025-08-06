@@ -84,7 +84,7 @@ const ISLAMIC_SITES = [
   'https://quran.com/',
   'https://sunnah.com/',
   'https://islamqa.info/',
-  // Add more reliable Islamic sites
+  // And more other reliable Islamic sites
 ]
 Customizing UI
 Edit src/app/page.tsx to modify:
