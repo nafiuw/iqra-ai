@@ -1,23 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Islamic knowledge base for common questions
-const islamicKnowledge = {
-  "patience": {
-    quran: "📖 Quran 2:153\n\"O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient.\"\n\nTranslation: Seek help through patience and prayer. Allah is with those who are patient.",
-    hadith: "🕌 Sahih Bukhari\nThe Prophet Muhammad (peace be upon him) said: \"Patience is a pillar of faith.\"\n\nExplanation: Patience is one of the most important virtues in Islam.",
-    explanation: "💡 Patience (Sabr) is a fundamental concept in Islam. It means to endure difficulties with faith and trust in Allah's plan."
-  },
-  "prayer": {
-    quran: "📖 Quran 4:103\n\"Indeed, prayer has been decreed upon the believers a decree of specified times.\"\n\nTranslation: Prayer is obligatory for believers at appointed times.",
-    hadith: "🕌 Sahih Muslim\nThe Prophet said: \"The prayer is the pillar of religion. Whoever establishes it, establishes religion, and whoever destroys it, destroys religion.\"\n\nExplanation: Prayer is the foundation of Islamic practice.",
-    explanation: "💡 Prayer (Salah) is the second pillar of Islam and serves as a direct connection between the believer and Allah."
-  },
-  "zakat": {
-    quran: "📖 Quran 9:103\n\"Take, [O Muhammad], from their wealth a charity by which you purify them and cause them increase.\"\n\nTranslation: Take from their wealth charity to purify and bless them.",
-    hadith: "🕌 Sahih Bukhari\nThe Prophet said: \"Islam is built upon five pillars: testifying that there is no god but Allah, establishing prayer, paying Zakat, fasting Ramadan, and pilgrimage to the House.\"\n\nExplanation: Zakat is the third pillar of Islam.",
-    explanation: "💡 Zakat is the obligatory charity that purifies wealth and helps those in need."
-  }
-}
+import ZAI from 'z-ai-web-dev-sdk'
+import { searchQuran } from '@/lib/islamic-sources'
+import { searchHadith } from '@/lib/islamic-sources'
+import { searchWeb } from '@/lib/search-engine'
+import { formatResponse } from '@/lib/response-formatter'
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,37 +13,100 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Question is required' }, { status: 400 })
     }
 
-    // Simple keyword matching for demo purposes
-    const lowerQuestion = question.toLowerCase()
-    
-    // Check for common Islamic topics
-    if (lowerQuestion.includes('patience') || lowerQuestion.includes('sabr')) {
-      const knowledge = islamicKnowledge.patience
-      const response = `${knowledge.quran}\n\n${knowledge.hadith}\n\n${knowledge.explanation}`
-      return NextResponse.json({ answer: response })
-    }
-    
-    if (lowerQuestion.includes('prayer') || lowerQuestion.includes('salah')) {
-      const knowledge = islamicKnowledge.prayer
-      const response = `${knowledge.quran}\n\n${knowledge.hadith}\n\n${knowledge.explanation}`
-      return NextResponse.json({ answer: response })
-    }
-    
-    if (lowerQuestion.includes('zakat') || lowerQuestion.includes('charity')) {
-      const knowledge = islamicKnowledge.zakat
-      const response = `${knowledge.quran}\n\n${knowledge.hadith}\n\n${knowledge.explanation}`
-      return NextResponse.json({ answer: response })
-    }
+    // Detect language
+    const isBangla = /[\u0980-\u09FF]/.test(question)
+    const responseLanguage = isBangla ? 'bangla' : 'english'
 
-    // Generic response for other questions
-    const genericResponse = `📖 Islamic Knowledge Response\n\nThank you for your question about: "${question}"\n\nAs Iqra AI, I prioritize answers from the Quran and Hadith. For your specific question, I recommend:\n\n1. 📖 Consulting the Quran for direct guidance\n2. 🕌 Referencing authentic Hadith collections\n3. 💡 Seeking knowledge from qualified Islamic scholars\n\n🌐 For more detailed information, please visit reliable Islamic sources like:\n- Quran.com\n- Sunnah.com\n- IslamQA.info\n\nMay Allah guide us all to beneficial knowledge. 🤲`
+    // Initialize ZAI
+    const zai = await ZAI.create()
+    
+    // Search from multiple sources in parallel
+    const [quranResults, hadithResults, webResults] = await Promise.allSettled([
+      searchQuran(question),
+      searchHadith(question),
+      searchWeb(question)
+    ])
 
-    return NextResponse.json({ answer: genericResponse })
+    // Process results
+    const quranData = quranResults.status === 'fulfilled' ? quranResults.value : []
+    const hadithData = hadithResults.status === 'fulfilled' ? hadithResults.value : []
+    const webData = webResults.status === 'fulfilled' ? webResults.value : []
+
+    // Create enhanced prompt for AI
+    const systemPrompt = `You are Iqra AI, a professional Islamic knowledge assistant. Your mission is to provide authentic, well-researched answers from Islamic sources.
+
+STRICT PRIORITY SYSTEM:
+1. QURAN (Highest Priority - Weight: 0.4): Always start with relevant Quranic verses
+2. HADITH (High Priority - Weight: 0.3): Include authentic Hadiths with proper references
+3. SCHOLARLY OPINIONS (Medium Priority - Weight: 0.2): Include scholarly interpretations
+4. GENERAL ISLAMIC KNOWLEDGE (Low Priority - Weight: 0.1): Use reliable Islamic sources
+
+REQUIREMENTS:
+- Start with Bismillah (بسم الله الرحمن الرحيم) for every response
+- Use Islamic greetings and manners
+- Include Arabic verses with proper formatting
+- Provide English/Bangla translations
+- Give detailed, scholarly explanations
+- Cite all sources properly
+- Respond in ${responseLanguage}
+- Be respectful and humble
+- Always prioritize Quran and Hadith
+
+RESPONSE FORMAT:
+📖 Quranic Verse(s) with Arabic text
+📝 Translation in ${responseLanguage}
+💡 Detailed explanation
+🕌 Relevant Hadith(s) with Arabic text
+📝 Hadith translation
+💡 Hadith explanation and context
+🎓 Scholarly insights
+🌐 Additional resources if needed
+
+AVAILABLE SOURCES:
+Quran Results: ${JSON.stringify(quranData.slice(0, 3))}
+Hadith Results: ${JSON.stringify(hadithData.slice(0, 3))}
+Web Results: ${JSON.stringify(webData.slice(0, 2))}
+
+User Question: ${question}
+
+Provide a comprehensive, well-structured answer that helps the user understand the topic deeply from an Islamic perspective.`
+
+    const completion = await zai.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: question }
+      ],
+      temperature: 0.3,
+      max_tokens: 3000,
+      top_p: 0.9,
+      frequency_penalty: 0.1,
+      presence_penalty: 0.1
+    })
+
+    const aiAnswer = completion.choices[0]?.message?.content || 
+      (isBangla ? 'আমি ক্ষমাপ্রার্থী, কিন্তু আমি এই মুহূর্তে উত্তর দিতে পারছি না। অনুগ্রহ করে আবার চেষ্টা করুন।' : 
+      'I apologize, but I cannot generate a response at this time. Please try again.')
+
+    // Format the response
+    const formattedResponse = formatResponse(aiAnswer, {
+      question,
+      sources: [...quranData, ...hadithData, ...webData],
+      language: responseLanguage
+    })
+
+    return NextResponse.json({ 
+      answer: formattedResponse,
+      sources: [...quranData, ...hadithData, ...webData],
+      language: responseLanguage
+    })
     
   } catch (error) {
     console.error('Search error:', error)
     return NextResponse.json(
-      { answer: 'I apologize, but I encountered an error. Please try asking your question again.' },
+      { 
+        answer: 'আমি ক্ষমাপ্রার্থী, আপনার প্রশ্ন প্রক্রিয়া করার সময় একটি ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+        error: 'An error occurred while processing your request'
+      },
       { status: 200 }
     )
   }
