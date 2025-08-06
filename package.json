@@ -1,6 +1,6 @@
 {
   "name": "iqra-ai",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,7 +19,9 @@
     "tailwindcss-animate": "^1.0.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "react-markdown": "^10.1.0",
+    "axios": "^1.10.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -27,7 +29,6 @@
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.0.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "15.3.5",
-    "critters": "^0.0.20"
+    "eslint-config-next": "15.3.5"
   }
 }
