@@ -5,6 +5,8 @@
 
 An intelligent Islamic knowledge assistant that provides authentic answers from Quran, Hadith, and reliable Islamic sources.
 
+🎖️Testing Video IqraAI Beta 1.0: https://youtu.be/0z5uSNU10o8
+
 ✨ Features
 
 📖 Quran First: Prioritizes answers from the Holy Quran
